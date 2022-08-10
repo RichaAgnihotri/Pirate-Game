@@ -20,12 +20,12 @@ var waterSplashSpritedata, waterSplashSpritesheet;
 function preload() {
   backgroundImg = loadImage("./assets/background.gif");
   towerImage = loadImage("./assets/tower.png");
-  boatSpritedata = loadJSON("./assets/boat/boat.json");
-  boatSpritesheet = loadImage("./assets/boat/boat.png");
-  brokenBoatSpritedata = loadJSON("./assets/boat/brokenBoat.json");
-  brokenBoatSpritesheet = loadImage("./assets/boat/brokenBoat.png");
-  waterSplashSpritedata = loadJSON("./assets/waterSplash/waterSplash.json");
-  waterSplashSpritesheet = loadImage("./assets/waterSplash/waterSplash.png");
+  boatSpritedata = loadJSON("assets/boat/boat.json");
+  boatSpritesheet = loadImage("assets/boat/boat.png");
+  brokenBoatSpritedata = loadJSON("assets/boat/brokenBoat.json");
+  brokenBoatSpritesheet = loadImage("assets/boat/brokenBoat.png");
+  waterSplashSpritedata = loadJSON("assets/waterSplash/waterSplash.json");
+  waterSplashSpritesheet = loadImage("assets/waterSplash/waterSplash.png");
 }
 
 function setup() {
@@ -34,6 +34,7 @@ function setup() {
   world = engine.world;
   angleMode(DEGREES)
   angle = 15
+
 
   ground = Bodies.rectangle(0, height - 1, width * 2, 1, { isStatic: true });
   World.add(world, ground);
@@ -44,29 +45,25 @@ function setup() {
   cannon = new Cannon(180, 110, 130, 100, angle);
 
   var boatFrames = boatSpritedata.frames;
-  
   for (var i = 0; i < boatFrames.length; i++) {
     var pos = boatFrames[i].position;
-    var image = boatSpritesheet.get(pos.x, pos.y, pos.w, pos.h);
-    boatAnimation.push(image);
+    var img = boatSpritesheet.get(pos.x, pos.y, pos.w, pos.h);
+    boatAnimation.push(img);
   }
 
   var brokenBoatFrames = brokenBoatSpritedata.frames;
-  
   for (var i = 0; i < brokenBoatFrames.length; i++) {
     var pos = brokenBoatFrames[i].position;
-    var image = brokenBoatSpritesheet.get(pos.x, pos.y, pos.w, pos.h);
-    brokenBoatAnimation.push(image);
+    var img = brokenBoatSpritesheet.get(pos.x, pos.y, pos.w, pos.h);
+    brokenBoatAnimation.push(img);
   }
 
   var waterSplashFrames = waterSplashSpritedata.frames;
-  
   for (var i = 0; i < waterSplashFrames.length; i++) {
     var pos = waterSplashFrames[i].position;
-    var image = waterSplashSpritesheet.get(pos.x, pos.y, pos.w, pos.h);
-    waterSplashAnimation.push(image);
+    var img = waterSplashSpritesheet.get(pos.x, pos.y, pos.w, pos.h);
+    waterSplashAnimation.push(img);
   }
- 
 }
 
 function draw() {
@@ -74,7 +71,7 @@ function draw() {
   image(backgroundImg, 0, 0, width, height);
 
   Engine.update(engine);
-  
+
   push();
   translate(ground.position.x, ground.position.y);
   fill("brown");
@@ -98,20 +95,20 @@ function draw() {
 
   cannon.display();
 
-
+  
 }
 
-function collisionWithBoat(index){
+function collisionWithBoat(index) {
   for (var i = 0; i < boats.length; i++) {
-    if (balls[index] !== undefined && boats[i] !== undefined){
-      var collision = Matter.SAT.collides(balls[index].body, boats[i].body)
+    if (balls[index] !== undefined && boats[i] !== undefined) {
+      var collision = Matter.SAT.collides(balls[index].body, boats[i].body);
 
-      if (collision.collided){
-        boats[i].remove(i);
+      if (collision.collided) {
+          boats[i].remove(i);
+        
 
-      Matter.World.remove(world, balls[index].body);
-      delete balls[index];
-    
+        Matter.World.remove(world, balls[index].body);
+        delete balls[index];
       }
     }
   }
@@ -119,7 +116,7 @@ function collisionWithBoat(index){
 
 function keyPressed() {
   if (keyCode === DOWN_ARROW) {
-    var cannonBall = new Cannonball(cannon.x, cannon.y);
+    var cannonBall = new CannonBall(cannon.x, cannon.y);
     cannonBall.trajectory = [];
     Matter.Body.setAngle(cannonBall.body, cannon.angle);
     balls.push(cannonBall);
@@ -129,8 +126,10 @@ function keyPressed() {
 function showCannonBalls(ball, index) {
   if (ball) {
     ball.display();
-    if (ball.body.position.x >= width || ball.body.position.y >= height - 50){
-      ball.remove(index);
+    ball.animate();
+    if (ball.body.position.x >= width || ball.body.position.y >= height - 50) {
+        ball.remove(index);
+      
     }
   }
 }
@@ -143,10 +142,16 @@ function showBoats() {
     ) {
       var positions = [-40, -60, -70, -20];
       var position = random(positions);
-      var boat = new Boat(width, height - 100, 170, 170, position, boatAnimation);
-    
-    boats.push(boat);
+      var boat = new Boat(
+        width,
+        height - 100,
+        170,
+        170,
+        position,
+        boatAnimation
+      );
 
+      boats.push(boat);
     }
 
     for (var i = 0; i < boats.length; i++) {
@@ -158,14 +163,14 @@ function showBoats() {
 
         boats[i].display();
         boats[i].animate();
-      
-      }
-      }
-      } 
-      else {
-        var boat = new Boat(width, height - 60, 170, 170, -60, boatAnimation);
-      }
+        
     }
+    }
+  } else {
+    var boat = new Boat(width, height - 60, 170, 170, -60, boatAnimation);
+    boats.push(boat);
+  }
+}
 
 function keyReleased() {
   if (keyCode === DOWN_ARROW) {
